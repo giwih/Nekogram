@@ -38,7 +38,7 @@ public class TranslatorSettingsPopupWrapper {
                         Translator.showTranslatorTypeSelector(context, null, null, resourcesProvider);
                         break;
                     case 1:
-                        Translator.showTranslationTargetSelector(fragment, null, null, false, resourcesProvider);
+                        Translator.showTranslationTargetSelector(fragment, null, null, resourcesProvider);
                         break;
                     case 2:
                         Translator.showTranslationProviderSelector(context, null, null, resourcesProvider);

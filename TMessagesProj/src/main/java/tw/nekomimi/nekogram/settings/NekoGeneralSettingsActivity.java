@@ -196,7 +196,7 @@ public class NekoGeneralSettingsActivity extends BaseNekoSettingsActivity {
                 if (Translator.getRestrictedLanguages().size() == 1) {
                     notifyItemChanged(doNotTranslateRow, PARTIAL);
                 }
-            }, true, resourcesProvider);
+            }, resourcesProvider);
         } else if (id == openArchiveOnPullRow) {
             NekoConfig.toggleOpenArchiveOnPull();
             if (view instanceof TextCheckCell) {
@@ -261,7 +261,7 @@ public class NekoGeneralSettingsActivity extends BaseNekoSettingsActivity {
                 }
             }, resourcesProvider);
         } else if (id == doNotTranslateRow) {
-            presentFragment(new NekoLanguagesSelectActivity(NekoLanguagesSelectActivity.TYPE_RESTRICTED, true));
+            presentFragment(new NekoLanguagesSelectActivity(NekoLanguagesSelectActivity.TYPE_RESTRICTED));
         } else if (id == autoTranslateRow) {
             NekoConfig.toggleAutoTranslate();
             if (view instanceof TextCheckCell) {

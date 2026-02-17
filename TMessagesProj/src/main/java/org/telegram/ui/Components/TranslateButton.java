@@ -329,7 +329,7 @@ public class TranslateButton extends FrameLayout {
                     R.raw.msg_translate,
                     bulletinText,
                     getString(R.string.Settings),
-                    () -> fragment.presentFragment(new NekoLanguagesSelectActivity(NekoLanguagesSelectActivity.TYPE_RESTRICTED, false))
+                    () -> fragment.presentFragment(new NekoLanguagesSelectActivity(NekoLanguagesSelectActivity.TYPE_RESTRICTED))
                 ).show();
                 popupWindow.dismiss();
             });

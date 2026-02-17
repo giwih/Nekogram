@@ -1,11 +1,9 @@
 package tw.nekomimi.nekogram.settings;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 import androidx.core.text.HtmlCompat;
@@ -15,13 +13,12 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.TranslateController;
+import org.telegram.messenger.Utilities;
 import org.telegram.ui.ActionBar.ActionBarMenuItem;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.TextCheckbox2Cell;
 import org.telegram.ui.Cells.TextInfoPrivacyCell;
 import org.telegram.ui.Cells.TextRadioCell;
-import org.telegram.ui.Components.EmptyTextProgressView;
-import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.Components.UItem;
 import org.telegram.ui.Components.UniversalAdapter;
@@ -55,21 +52,18 @@ public class NekoLanguagesSelectActivity extends BaseNekoSettingsActivity {
             "yo", "zh", "zu");
 
     private final int currentType;
-    private final boolean whiteActionBar;
 
-    private boolean search;
-
-    private EmptyTextProgressView emptyView;
-
-    private ArrayList<NekoLanguagesSelectActivity.LocaleInfo> searchResult;
-    private ArrayList<NekoLanguagesSelectActivity.LocaleInfo> allLanguages;
-    private ArrayList<NekoLanguagesSelectActivity.LocaleInfo> sortedLanguages;
+    private final ArrayList<NekoLanguagesSelectActivity.LocaleInfo> allLanguages = new ArrayList<>();
+    private final ArrayList<NekoLanguagesSelectActivity.LocaleInfo> sortedLanguages = new ArrayList<>();
+    private final ArrayList<NekoLanguagesSelectActivity.LocaleInfo> searchResult = new ArrayList<>();
+    private boolean searchWas;
+    private Runnable searchRunnable;
+    private String lastSearchString;
 
     private ArrayList<String> restrictedLanguages;
 
-    public NekoLanguagesSelectActivity(int type, boolean whiteActionBar) {
+    public NekoLanguagesSelectActivity(int type) {
         this.currentType = type;
-        this.whiteActionBar = whiteActionBar;
 
         if (currentType == TYPE_RESTRICTED) {
             UItem.UItemFactory.setup(new TextCheckbox2CellFactory());
@@ -86,54 +80,27 @@ public class NekoLanguagesSelectActivity extends BaseNekoSettingsActivity {
 
     @Override
     public View createView(Context context) {
-        FrameLayout fragmentView = (FrameLayout) super.createView(context);
+        var fragmentView = super.createView(context);
 
         var menu = actionBar.createMenu();
-        var item = menu.addItem(0, R.drawable.outline_header_search).setIsSearchField(true).setActionBarMenuItemSearchListener(new ActionBarMenuItem.ActionBarMenuItemSearchListener() {
+        createSearchItem(menu, new ActionBarMenuItem.ActionBarMenuItemSearchListener() {
 
             @Override
             public void onSearchCollapse() {
+                updateActionBarVisible();
                 search(null);
-                if (listView != null) {
-                    emptyView.setVisibility(View.GONE);
-                    search = false;
-                    listView.adapter.update(true);
-                }
+            }
+
+            @Override
+            public void onSearchExpand() {
+                updateActionBarVisible();
             }
 
             @Override
             public void onTextChanged(EditText editText) {
-                String text = editText.getText().toString();
-                search(text);
-                if (text.length() != 0) {
-                    if (listView != null) {
-                        search = true;
-                        listView.adapter.update(true);
-                    }
-                } else {
-                    if (listView != null) {
-                        emptyView.setVisibility(View.GONE);
-                        search = false;
-                        listView.adapter.update(true);
-                    }
-                }
+                search(editText.getText().toString());
             }
         });
-        item.setSearchFieldHint(LocaleController.getString(R.string.Search));
-
-        if (whiteActionBar) {
-            actionBar.setSearchTextColor(getThemedColor(Theme.key_windowBackgroundWhiteGrayText), true);
-            actionBar.setSearchTextColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText), false);
-            actionBar.setSearchCursorColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText));
-        }
-
-        emptyView = new EmptyTextProgressView(context);
-        emptyView.setText(LocaleController.getString(R.string.NoResult));
-        emptyView.showTextView();
-        emptyView.setShowAtCenter(true);
-        fragmentView.addView(emptyView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
-
-        listView.setEmptyView(emptyView);
 
         listView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -147,38 +114,39 @@ public class NekoLanguagesSelectActivity extends BaseNekoSettingsActivity {
         return fragmentView;
     }
 
-    public void search(final String query) {
-        if (query == null) {
-            searchResult = null;
-        } else {
-            processSearch(query);
+    private void search(String text) {
+        lastSearchString = text;
+        if (searchRunnable != null) {
+            Utilities.searchQueue.cancelRunnable(searchRunnable);
+            searchRunnable = null;
         }
-    }
-
-    private void processSearch(final String query) {
-        String q = query.trim().toLowerCase();
-        if (q.length() == 0) {
-            updateSearchResults(new ArrayList<>());
+        if (TextUtils.isEmpty(text)) {
+            searchWas = false;
+            searchResult.clear();
+            listView.adapter.update(true);
             return;
         }
-        ArrayList<NekoLanguagesSelectActivity.LocaleInfo> resultArray = new ArrayList<>();
-
-        for (int a = 0, N = allLanguages.size(); a < N; a++) {
-            NekoLanguagesSelectActivity.LocaleInfo c = allLanguages.get(a);
-            if (c.name.toString().toLowerCase().startsWith(query) || c.nameEnglish.toString().toLowerCase().startsWith(query) || c.nameLocalized.toString().toLowerCase().startsWith(query)) {
-                resultArray.add(c);
+        Utilities.searchQueue.postRunnable(searchRunnable = () -> {
+            var results = new ArrayList<NekoLanguagesSelectActivity.LocaleInfo>();
+            var lowerQuery = text.toLowerCase();
+            for (var language : allLanguages) {
+                if (language.name.toString().toLowerCase().startsWith(lowerQuery) ||
+                        language.nameEnglish.toString().toLowerCase().startsWith(lowerQuery) ||
+                        language.nameLocalized.toString().toLowerCase().startsWith(lowerQuery)) {
+                    results.add(language);
+                }
             }
-        }
 
-        updateSearchResults(resultArray);
-    }
-
-    @SuppressLint("NotifyDataSetChanged")
-    private void updateSearchResults(final ArrayList<LocaleInfo> arrCounties) {
-        AndroidUtilities.runOnUIThread(() -> {
-            searchResult = arrCounties;
-            listView.adapter.update(true);
-        });
+            AndroidUtilities.runOnUIThread(() -> {
+                if (!text.equals(lastSearchString)) {
+                    return;
+                }
+                searchWas = true;
+                searchResult.clear();
+                searchResult.addAll(results);
+                listView.adapter.update(true);
+            });
+        }, 300);
     }
 
     private String getCurrentTargetLanguage() {
@@ -193,7 +161,7 @@ public class NekoLanguagesSelectActivity extends BaseNekoSettingsActivity {
         if (currentType == TYPE_RESTRICTED) {
             restrictedLanguages = Translator.getRestrictedLanguages();
         }
-        allLanguages = new ArrayList<>();
+        allLanguages.clear();
         Locale localeEn = Locale.forLanguageTag("en");
         for (String languageCode : currentType == TYPE_RESTRICTED ? RESTRICTED_LIST : Translator.getCurrentTargetLanguages()) {
             var localeInfo = new LocaleInfo(languageCode);
@@ -209,7 +177,8 @@ public class NekoLanguagesSelectActivity extends BaseNekoSettingsActivity {
             }
             allLanguages.add(localeInfo);
         }
-        sortedLanguages = new ArrayList<>(allLanguages);
+        sortedLanguages.clear();
+        sortedLanguages.addAll(allLanguages);
         if (currentType == TYPE_TARGET) {
             sortedLanguages.add(0, new LocaleInfo("app"));
         }
@@ -247,7 +216,7 @@ public class NekoLanguagesSelectActivity extends BaseNekoSettingsActivity {
     @Override
     protected void fillItems(ArrayList<UItem> items, UniversalAdapter adapter) {
         var factory = currentType == TYPE_TARGET ? TextRadioCellFactory.class : TextCheckbox2CellFactory.class;
-        for (var locale : (search ? searchResult : sortedLanguages)) {
+        for (var locale : (searchWas ? searchResult : sortedLanguages)) {
             if (locale.langCode.equals("shadow")) {
                 items.add(UItem.asShadow(null));
                 continue;
@@ -272,7 +241,7 @@ public class NekoLanguagesSelectActivity extends BaseNekoSettingsActivity {
             return;
         }
         LocaleInfo localeInfo;
-        if (search) {
+        if (searchWas) {
             localeInfo = searchResult.get(position);
         } else {
             localeInfo = sortedLanguages.get(position);

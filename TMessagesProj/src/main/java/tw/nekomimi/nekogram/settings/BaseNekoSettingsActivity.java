@@ -25,6 +25,8 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.ui.ActionBar.ActionBar;
+import org.telegram.ui.ActionBar.ActionBarMenu;
+import org.telegram.ui.ActionBar.ActionBarMenuItem;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.INavigationLayout;
 import org.telegram.ui.ActionBar.Theme;
@@ -59,6 +61,7 @@ public abstract class BaseNekoSettingsActivity extends BaseFragment {
     protected LinearLayoutManager layoutManager;
     protected Theme.ResourcesProvider resourcesProvider;
     protected View actionBarBackground;
+    protected ActionBarMenuItem searchItem;
 
     protected int rowId = 1;
 
@@ -214,8 +217,23 @@ public abstract class BaseNekoSettingsActivity extends BaseFragment {
         return fragmentView = contentView;
     }
 
+    protected void createSearchItem(ActionBarMenu menu, ActionBarMenuItem.ActionBarMenuItemSearchListener searchListener) {
+        searchItem = menu.addItem(0, R.drawable.outline_header_search, resourceProvider).setIsSearchField(true).setActionBarMenuItemSearchListener(searchListener);
+        searchItem.setSearchFieldHint(LocaleController.getString(R.string.Search));
+        searchItem.setContentDescription(LocaleController.getString(R.string.Search));
+    }
+
     protected boolean isSearchFieldVisible() {
-        return false;
+        return searchItem != null && searchItem.isSearchFieldVisible2();
+    }
+
+    @Override
+    public boolean onBackPressed(boolean invoked) {
+        if (isSearchFieldVisible()) {
+            if (invoked) actionBar.closeSearchField();
+            return false;
+        }
+        return super.onBackPressed(invoked);
     }
 
     private boolean actionBarVisible;

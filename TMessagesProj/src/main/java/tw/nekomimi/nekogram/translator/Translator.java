@@ -171,7 +171,7 @@ public class Translator {
         return new Pair<>(names, types);
     }
 
-    public static void showTranslationTargetSelector(BaseFragment fragment, View view, Runnable callback, boolean whiteActionBar, Theme.ResourcesProvider resourcesProvider) {
+    public static void showTranslationTargetSelector(BaseFragment fragment, View view, Runnable callback, Theme.ResourcesProvider resourcesProvider) {
         if (getCurrentTargetLanguages().size() <= 30) {
             ArrayList<String> targetLanguages = new ArrayList<>(getCurrentTargetLanguages());
             ArrayList<CharSequence> names = new ArrayList<>();
@@ -191,7 +191,7 @@ public class Translator {
                 if (callback != null) callback.run();
             }, resourcesProvider);
         } else {
-            fragment.presentFragment(new NekoLanguagesSelectActivity(NekoLanguagesSelectActivity.TYPE_TARGET, whiteActionBar));
+            fragment.presentFragment(new NekoLanguagesSelectActivity(NekoLanguagesSelectActivity.TYPE_TARGET));
         }
     }
 

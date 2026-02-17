@@ -1,7 +1,5 @@
 package tw.nekomimi.nekogram.settings;
 
-import static org.telegram.messenger.LocaleController.getString;
-
 import android.content.Context;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -73,7 +71,7 @@ public class NekoSettingsActivity extends BaseNekoSettingsActivity implements Fa
 
     private final int sponsorRow = 100;
 
-    private ActionBarMenuItem searchItem, syncItem;
+    private ActionBarMenuItem syncItem;
     private final ArrayList<SearchResult> searchArray = createSearchArray();
     private final ArrayList<CharSequence> resultNames = new ArrayList<>();
     private final ArrayList<SearchResult> searchResults = new ArrayList<>();
@@ -116,7 +114,7 @@ public class NekoSettingsActivity extends BaseNekoSettingsActivity implements Fa
         var fragmentView = super.createView(context);
 
         var menu = actionBar.createMenu();
-        searchItem = menu.addItem(0, R.drawable.outline_header_search, resourceProvider).setIsSearchField(true).setActionBarMenuItemSearchListener(new ActionBarMenuItem.ActionBarMenuItemSearchListener() {
+        createSearchItem(menu, new ActionBarMenuItem.ActionBarMenuItemSearchListener() {
 
             @Override
             public void onSearchCollapse() {
@@ -128,8 +126,8 @@ public class NekoSettingsActivity extends BaseNekoSettingsActivity implements Fa
             @Override
             public void onSearchExpand() {
                 animatorSearchPageVisible.setValue(true, true);
-                search("");
                 updateActionBarVisible();
+                search("");
                 listView.adapter.update(true);
             }
 
@@ -138,8 +136,6 @@ public class NekoSettingsActivity extends BaseNekoSettingsActivity implements Fa
                 search(editText.getText().toString());
             }
         });
-        searchItem.setSearchFieldHint(getString(R.string.Search));
-        searchItem.setContentDescription(getString(R.string.Search));
         syncItem = menu.addItem(1, R.drawable.cloud_sync);
         syncItem.setContentDescription(LocaleController.getString(R.string.CloudConfig));
         syncItem.setOnClickListener(v -> CloudSettingsHelper.getInstance().showDialog(this));
@@ -153,13 +149,8 @@ public class NekoSettingsActivity extends BaseNekoSettingsActivity implements Fa
     }
 
     @Override
-    protected boolean isSearchFieldVisible() {
-        return searchItem != null && searchItem.isSearchFieldVisible2();
-    }
-
-    @Override
     protected void fillItems(ArrayList<UItem> items, UniversalAdapter adapter) {
-        if (searchItem != null && searchItem.isSearchFieldVisible2()) {
+        if (isSearchFieldVisible()) {
             items.add(UItem.asSpace(ActionBar.getCurrentActionBarHeight()));
             fillSearchItems(items);
             return;
@@ -263,15 +254,6 @@ public class NekoSettingsActivity extends BaseNekoSettingsActivity implements Fa
     @Override
     protected String getKey() {
         return "";
-    }
-
-    @Override
-    public boolean onBackPressed(boolean invoked) {
-        if (searchItem.isSearchFieldVisible2()) {
-            if (invoked) actionBar.closeSearchField();
-            return false;
-        }
-        return super.onBackPressed(invoked);
     }
 
     @Override
