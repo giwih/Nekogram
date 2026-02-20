@@ -107,12 +107,12 @@ public class FolderIconHelper {
     }
 
     public static int getIconWidth() {
-        return AndroidUtilities.dp(28);
+        return AndroidUtilities.dp(24);
     }
 
     public static int getPadding() {
         if (NekoConfig.tabsTitleType == NekoConfig.TITLE_TYPE_MIX) {
-            return AndroidUtilities.dp(6);
+            return AndroidUtilities.dp(5);
         }
         return 0;
     }
@@ -125,11 +125,18 @@ public class FolderIconHelper {
         return result;
     }
 
-    public static int getInternalPaddingTab() {
+    public static int getPaddingTab() {
         if (NekoConfig.tabsTitleType != NekoConfig.TITLE_TYPE_ICON) {
-            return AndroidUtilities.dp(12.5f);
+            return 24;
         }
-        return AndroidUtilities.dp(6.25f);
+        return 12;
+    }
+
+    public static float getInternalPaddingTab() {
+        if (NekoConfig.tabsTitleType != NekoConfig.TITLE_TYPE_ICON) {
+            return 12.5f;
+        }
+        return 6.25f;
     }
 
     public static int getTabIcon(String emoji) {

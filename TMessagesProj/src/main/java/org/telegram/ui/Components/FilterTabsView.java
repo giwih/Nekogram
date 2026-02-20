@@ -313,7 +313,7 @@ public class FilterTabsView extends FrameLayout {
 
         @Override
         protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-            int w = currentTab.getWidth(false) + dp(TAB_PADDING_WIDTH) + additionalTabWidth;
+            int w = currentTab.getWidth(false) + dp(FolderIconHelper.getPaddingTab()) + additionalTabWidth;
             setMeasuredDimension(w, MeasureSpec.getSize(heightMeasureSpec));
         }
 
@@ -535,7 +535,7 @@ public class FilterTabsView extends FrameLayout {
                 if (animateTextChange) {
                     titleWidth = animateFromTitleWidth * (1f - changeProgress) + currentTab.titleWidth * changeProgress;
                 }
-                int textSpace = NekoConfig.tabsTitleType != NekoConfig.TITLE_TYPE_ICON ? AndroidUtilities.dp(5) : 0;
+                int textSpace = NekoConfig.tabsTitleType != NekoConfig.TITLE_TYPE_ICON ? dp(5) : 0;
                 if (animateTextChange && titleAnimateOutLayout == null) {
                     x = textX - titleXOffset + titleOffsetX + titleWidth + textSpace;
                 } else {
@@ -1201,7 +1201,7 @@ public class FilterTabsView extends FrameLayout {
         });
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new TouchHelperCallback());
         itemTouchHelper.attachToRecyclerView(listView);
-        listViewPaddingH = Math.max(0, dp(23.5f - TAB_PADDING_WIDTH / 2f));
+        listViewPaddingH = Math.max(0, dp(23.5f - FolderIconHelper.getPaddingTab() / 2f));
         listView.setPadding(listViewPaddingH, 0, listViewPaddingH, 0);
         listView.setClipToPadding(false);
         listView.setDrawSelectorBehind(true);
@@ -1377,7 +1377,7 @@ public class FilterTabsView extends FrameLayout {
         Tab tab = new Tab(id, text(text, entities), emoticon, noanimate);
         tab.isDefault = isDefault;
         tab.isLocked = isLocked;
-        allTabsWidth += tab.getWidth(true) + dp(TAB_PADDING_WIDTH);
+        allTabsWidth += tab.getWidth(true) + dp(FolderIconHelper.getPaddingTab());
         tabs.add(tab);
     }
 
@@ -1396,7 +1396,7 @@ public class FilterTabsView extends FrameLayout {
         Tab tab = new Tab(id, text, emoticon, noanimate);
         tab.isDefault = isDefault;
         tab.isLocked = isLocked;
-        allTabsWidth += tab.getWidth(true) + dp(TAB_PADDING_WIDTH);
+        allTabsWidth += tab.getWidth(true) + dp(FolderIconHelper.getPaddingTab());
         tabs.add(tab);
     }
 
@@ -1485,7 +1485,7 @@ public class FilterTabsView extends FrameLayout {
             positionToWidth.put(a, tabWidth);
             positionToCount.put(a, tabs.get(a).counter);
             positionToX.put(a, xOffset + additionalTabWidth / 2);
-            xOffset += tabWidth + dp(TAB_PADDING_WIDTH) + additionalTabWidth;
+            xOffset += tabWidth + dp(FolderIconHelper.getPaddingTab()) + additionalTabWidth;
         }
     }
 
@@ -1575,10 +1575,10 @@ public class FilterTabsView extends FrameLayout {
                     float prevH = positionToCount.get(idx1) != 0 ? 1 : 0;
                     float newH = positionToCount.get(idx2) != 0 ? 1 : 0;
                     if (additionalTabWidth != 0) {
-                        indicatorX = lerp(prevX, newX, animatingIndicatorProgress) + dp(TAB_PADDING_WIDTH / 2f);
+                        indicatorX = lerp(prevX, newX, animatingIndicatorProgress) + dp(FolderIconHelper.getPaddingTab() / 2f);
                     } else {
                         int x = positionToX.get(position);
-                        indicatorX = lerp(prevX, newX, animatingIndicatorProgress) - (x - holder.itemView.getLeft()) + dp(TAB_PADDING_WIDTH / 2f);
+                        indicatorX = lerp(prevX, newX, animatingIndicatorProgress) - (x - holder.itemView.getLeft()) + dp(FolderIconHelper.getPaddingTab() / 2f);
                     }
                     indicatorWidth = lerp(prevW, newW, animatingIndicatorProgress);
                     counterVisible = lerp(prevH, newH, animatingIndicatorProgress);
@@ -1610,7 +1610,7 @@ public class FilterTabsView extends FrameLayout {
             final float add = additionalTabWidth / 2f;
 
             final int y = height / 2 - dp(14);
-            selectorDrawable.setBounds((int) (indicatorX - FolderIconHelper.getInternalPaddingTab() - add), y, (int) (indicatorX + indicatorWidth + FolderIconHelper.getInternalPaddingTab() + add), y + dp(28));
+            selectorDrawable.setBounds((int) (indicatorX - dp(FolderIconHelper.getInternalPaddingTab()) - add), y, (int) (indicatorX + indicatorWidth + dp(FolderIconHelper.getInternalPaddingTab()) + add), y + dp(28));
             selectorDrawable.setAlpha(31);
             selectorDrawable.draw(canvas);
             canvas.restore();
@@ -1826,7 +1826,7 @@ public class FilterTabsView extends FrameLayout {
                 allTabsWidth = 0;
                 if (!NekoConfig.hideAllTab) findDefaultTab().setTitle(LocaleController.getString(R.string.FilterAllChats), null, false);
                 for (int b = 0; b < N; b++) {
-                    allTabsWidth += tabs.get(b).getWidth(true) + dp(TAB_PADDING_WIDTH);
+                    allTabsWidth += tabs.get(b).getWidth(true) + dp(FolderIconHelper.getPaddingTab());
                 }
                 break;
             }
@@ -1857,7 +1857,7 @@ public class FilterTabsView extends FrameLayout {
             allTabsWidth = 0;
             if (!NekoConfig.hideAllTab) findDefaultTab().setTitle(LocaleController.getString(R.string.FilterAllChats), null, false);
             for (int b = 0, N = tabs.size(); b < N; b++) {
-                allTabsWidth += tabs.get(b).getWidth(true) + dp(TAB_PADDING_WIDTH);
+                allTabsWidth += tabs.get(b).getWidth(true) + dp(FolderIconHelper.getPaddingTab());
             }
         }
     }
