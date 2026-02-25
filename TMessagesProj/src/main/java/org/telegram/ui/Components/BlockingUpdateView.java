@@ -36,12 +36,12 @@ import org.telegram.messenger.browser.Browser;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.Theme;
+import org.telegram.ui.Components.spoilers.SpoilersTextView;
 import org.telegram.ui.Components.voip.CellFlickerDrawable;
 
 import java.io.File;
 import java.util.Locale;
 
-import tw.nekomimi.nekogram.TextViewEffects;
 import tw.nekomimi.nekogram.helpers.ApkInstaller;
 import tw.nekomimi.nekogram.helpers.remote.UpdateHelper;
 
@@ -102,7 +102,7 @@ public class BlockingUpdateView extends FrameLayout implements NotificationCente
         titleTextView.setText(LocaleController.getString(R.string.UpdateNekogram));
         container.addView(titleTextView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL | Gravity.TOP));
 
-        textView = new TextViewEffects(context);
+        textView = new SpoilersTextView(context);
         textView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
         textView.setLinkTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteLinkText));
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
