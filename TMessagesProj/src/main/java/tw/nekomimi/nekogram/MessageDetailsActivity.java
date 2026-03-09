@@ -162,7 +162,7 @@ public class MessageDetailsActivity extends BaseNekoSettingsActivity implements 
             }
         }
 
-        noforwards = getMessagesController().isChatNoForwards(toChat) ||
+        noforwards = isPeerNoForwards() ||
                 messageObject.messageOwner.noforwards ||
                 messageObject.type == MessageObject.TYPE_PAID_MEDIA;
     }
@@ -186,15 +186,24 @@ public class MessageDetailsActivity extends BaseNekoSettingsActivity implements 
     }
 
     private void showNoForwards() {
-        if (getMessagesController().isChatNoForwards(toChat)) {
-            BulletinFactory.of(this).createErrorBulletin(toChat.broadcast ?
-                    LocaleController.getString(R.string.ForwardsRestrictedInfoChannel) :
-                    LocaleController.getString(R.string.ForwardsRestrictedInfoGroup)
+        if (isPeerNoForwards()) {
+            BulletinFactory.of(this).createErrorBulletin(
+                    LocaleController.getString(
+                            toChat == null ? R.string.ForwardsRestrictedInfoUser :
+                                    toChat.broadcast ?
+                                            R.string.ForwardsRestrictedInfoChannel :
+                                            R.string.ForwardsRestrictedInfoGroup)
             ).show();
         } else {
             BulletinFactory.of(this).createErrorBulletin(
                     LocaleController.getString(R.string.ForwardsRestrictedInfoBot)).show();
         }
+    }
+
+    public boolean isPeerNoForwards() {
+        return toChat != null ?
+                getMessagesController().isChatNoForwards(toChat) :
+                fromUser != null && getMessagesController().isUserNoForwards(fromUser.id);
     }
 
     @Override
