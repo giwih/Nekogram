@@ -72,6 +72,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Matcher;
 
+import tw.nekomimi.nekogram.helpers.SettingsHelper;
+import tw.nekomimi.nekogram.helpers.UserHelper;
+
 public class LinkManager {
 
     private final LaunchActivity activity;
@@ -143,6 +146,12 @@ public class LinkManager {
         if ("oauth".equalsIgnoreCase(first))
             return handleOAuth(uri, uri.getQueryParameter("startapp"));
 
+        if ("nekosettings".equals(first)) {
+            SettingsHelper.processDeepLink(uri, this::presentFragment,
+                    () -> getBulletinFactory().createErrorBulletin(LocaleController.getString(R.string.UnknownNekoSettingsOption)).show(), progress);
+            return true;
+        }
+
         return false;
     }
 
@@ -185,6 +194,25 @@ public class LinkManager {
 
         if ("settings".equalsIgnoreCase(first))
             return handleSettings(segments.subList(1, segments.size()));
+
+        if ("update".equals(first) || "upgrade".equals(first)) {
+            activity.checkAppUpdate(true, progress);
+            return true;
+        }
+
+        if ("meow".equals(first) || "nya".equals(first)) {
+            getBulletinFactory().createErrorBulletin(LocaleController.getString(R.string.Nya)).show();
+            return true;
+        }
+
+        if ("user".equalsIgnoreCase(first) || "chat".equalsIgnoreCase(first)) {
+            var id = Utilities.parseLong(uri.getQueryParameter("id"));
+            if (id > 0) {
+                UserHelper.getInstance(currentAccount).openByDialogId("chat".equalsIgnoreCase(first) ? -id : id, activity, this::presentFragment, progress);
+                return true;
+            }
+            return false;
+        }
 
         if ("chats".equalsIgnoreCase(first)) {
             if ("search".equalsIgnoreCase(second)) {
