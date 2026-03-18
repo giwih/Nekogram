@@ -24,14 +24,15 @@ import tw.nekomimi.nekogram.helpers.PopupHelper;
 public class NekoAppearanceSettingsActivity extends BaseNekoSettingsActivity implements NotificationCenter.NotificationCenterDelegate {
 
     private final int emojiSetsRow = rowId++;
-    private final int mediaPreviewRow = rowId++;
     private final int predictiveBackAnimationRow = rowId++;
     private final int appBarShadowRow = rowId++;
     private final int formatTimeWithSecondsRow = rowId++;
     private final int disableNumberRoundingRow = rowId++;
     private final int hideBottomNavigationBarRow = rowId++;
     private final int tabletModeRow = rowId++;
-    private final int eventTypeRow = rowId++;
+
+    private final int hideStoriesRow = rowId++;
+    private final int mediaPreviewRow = rowId++;
 
     private final int hideAllTabRow = rowId++;
     private final int tabsTitleTypeRow = rowId++;
@@ -60,7 +61,6 @@ public class NekoAppearanceSettingsActivity extends BaseNekoSettingsActivity imp
     protected void fillItems(ArrayList<UItem> items, UniversalAdapter adapter) {
         items.add(UItem.asHeader(LocaleController.getString(R.string.ChangeChannelNameColor2)));
         items.add(EmojiSetCellFactory.of(emojiSetsRow, LocaleController.getString(R.string.EmojiSets)).slug("emojiSets"));
-        items.add(UItem.asCheck(mediaPreviewRow, LocaleController.getString(R.string.MediaPreview)).slug("mediaPreview").setChecked(NekoConfig.mediaPreview));
         items.add(UItem.asCheck(predictiveBackAnimationRow, LocaleController.getString(R.string.PredictiveBackAnimation)).slug("predictiveBackAnimation").setChecked(NekoConfig.predictiveBackAnimation));
         items.add(UItem.asCheck(appBarShadowRow, LocaleController.getString(R.string.DisableAppBarShadow)).slug("appBarShadow").setChecked(NekoConfig.disableAppBarShadow));
         items.add(UItem.asCheck(formatTimeWithSecondsRow, LocaleController.getString(R.string.FormatWithSeconds)).slug("formatTimeWithSeconds").setChecked(NekoConfig.formatTimeWithSeconds));
@@ -71,6 +71,11 @@ public class NekoAppearanceSettingsActivity extends BaseNekoSettingsActivity imp
             case NekoConfig.TABLET_ENABLE -> LocaleController.getString(R.string.Enable);
             default -> LocaleController.getString(R.string.Disable);
         }).slug("tabletMode"));
+        items.add(UItem.asShadow(null));
+
+        items.add(UItem.asHeader(LocaleController.getString(R.string.SavedDialogsTab)));
+        items.add(UItem.asCheck(hideStoriesRow, LocaleController.getString(R.string.HideStories)).slug("hideStories").setChecked(NekoConfig.hideStories));
+        items.add(UItem.asCheck(mediaPreviewRow, LocaleController.getString(R.string.MediaPreview)).slug("mediaPreview").setChecked(NekoConfig.mediaPreview));
         items.add(UItem.asShadow(null));
 
         items.add(UItem.asHeader(LocaleController.getString(R.string.Filters)));
@@ -126,6 +131,12 @@ public class NekoAppearanceSettingsActivity extends BaseNekoSettingsActivity imp
             if (view instanceof TextCheckCell) {
                 ((TextCheckCell) view).setChecked(NekoConfig.mediaPreview);
             }
+        } else if (id == hideStoriesRow) {
+            NekoConfig.toggleHideStories();
+            if (view instanceof TextCheckCell) {
+                ((TextCheckCell) view).setChecked(NekoConfig.hideStories);
+            }
+            getNotificationCenter().postNotificationName(NotificationCenter.storiesEnabledUpdate);
         } else if (id == formatTimeWithSecondsRow) {
             NekoConfig.toggleFormatTimeWithSeconds();
             if (view instanceof TextCheckCell) {
