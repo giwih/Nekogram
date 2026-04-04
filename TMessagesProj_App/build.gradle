@@ -3,24 +3,27 @@ import com.android.build.api.variant.FilterConfiguration
 plugins {
     id 'com.android.application'
     id 'com.google.gms.google-services'
-    id 'io.sentry.android.gradle'
+    // id 'io.sentry.android.gradle'
 }
 
 dependencies {
     implementation project(':TMessagesProj')
 }
 
-sentry {
-    uploadNativeSymbols = true
-    includeSourceContext = true
-    additionalSourceDirsForSourceContext = [ '../TMessagesProj/src/main/java' ]
-    autoInstallation {
-        enabled = false
-    }
-    ignoredBuildTypes = ["debug"]
-}
+// sentry {
+//     uploadNativeSymbols = true
+//     includeSourceContext = true
+//     additionalSourceDirsForSourceContext = [ '../TMessagesProj/src/main/java' ]
+//     autoInstallation {
+//         enabled = false
+//     }
+//     ignoredBuildTypes = ["debug"]
+// }
 
 android {
+    def hasAbiParam = project.hasProperty('abiFilters')
+    def targetAbis = hasAbiParam ? project.property('abiFilters').split(',') : []
+
     defaultConfig.applicationId = APP_PACKAGE
 
     packagingOptions {
@@ -73,6 +76,9 @@ android {
         versionName APP_VERSION_NAME
 
         multiDexEnabled true
+        if (hasAbiParam) {
+            ndk.abiFilters targetAbis
+        }
     }
 
     bundle {
@@ -83,11 +89,16 @@ android {
 
     splits.abi {
         var buildingBundle = gradle.startParameter.taskNames.any { it.startsWith("bundle") }
-        enable !buildingBundle
-        universalApk true
+        
+        if (hasAbiParam) {
+            enable false
+        } else {
+            enable !buildingBundle
+            universalApk true
 
-        reset()
-        include "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+            reset()
+            include "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+        }
     }
     namespace 'org.telegram.messenger.regular'
 
